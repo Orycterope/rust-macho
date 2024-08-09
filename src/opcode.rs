@@ -225,22 +225,30 @@ impl<'a> Iterator for Bind<'a> {
                     self.symbol.symbol_offset = segment_offset as isize;
                 }
                 BindOpCode::AddAddress { offset } => {
-                    self.symbol.symbol_offset += offset;
+                    self.symbol.symbol_offset = self.symbol.symbol_offset.wrapping_add(offset);
                 }
                 BindOpCode::Bind => {
                     let sym = self.symbol.clone();
-                    self.symbol.symbol_offset += self.opcodes.ptr_size as isize;
+                    self.symbol.symbol_offset = self.symbol.symbol_offset.wrapping_add(self.opcodes.ptr_size as isize);
                     return Some(sym);
                 }
                 BindOpCode::BindAndAddAddress { offset } => {
                     let sym = self.symbol.clone();
-                    self.symbol.symbol_offset += offset + self.opcodes.ptr_size as isize;
+                    self.symbol.symbol_offset = self
+                        .symbol
+                        .symbol_offset
+                        .wrapping_add(offset)
+                        .wrapping_add(self.opcodes.ptr_size as isize);
                     return Some(sym);
                 }
                 BindOpCode::BindAndSkipping { times, skip } => {
                     if times > 0 {
                         let sym = self.symbol.clone();
-                        self.symbol.symbol_offset += (skip + self.opcodes.ptr_size) as isize;
+                        self.symbol.symbol_offset = self
+                            .symbol
+                            .symbol_offset
+                            .wrapping_add(skip as isize)
+                            .wrapping_add(self.opcodes.ptr_size as isize);
                         self.current_opcode = Some(BindOpCode::BindAndSkipping { times: times - 1, skip });
                         return Some(sym);
                     }
@@ -320,22 +328,30 @@ impl<'a> Iterator for WeakBind<'a> {
                     self.symbol.symbol_offset = segment_offset as isize;
                 }
                 BindOpCode::AddAddress { offset } => {
-                    self.symbol.symbol_offset += offset;
+                    self.symbol.symbol_offset = self.symbol.symbol_offset.wrapping_add(offset);
                 }
                 BindOpCode::Bind => {
                     let sym = self.symbol.clone();
-                    self.symbol.symbol_offset += self.opcodes.ptr_size as isize;
+                    self.symbol.symbol_offset = self.symbol.symbol_offset.wrapping_add(self.opcodes.ptr_size as isize);
                     return Some(sym);
                 }
                 BindOpCode::BindAndAddAddress { offset } => {
                     let sym = self.symbol.clone();
-                    self.symbol.symbol_offset += offset + self.opcodes.ptr_size as isize;
+                    self.symbol.symbol_offset = self
+                        .symbol
+                        .symbol_offset
+                        .wrapping_add(offset)
+                        .wrapping_add(self.opcodes.ptr_size as isize);
                     return Some(sym);
                 }
                 BindOpCode::BindAndSkipping { times, skip } => {
                     if times > 0 {
                         let sym = self.symbol.clone();
-                        self.symbol.symbol_offset += (skip + self.opcodes.ptr_size) as isize;
+                        self.symbol.symbol_offset = self
+                            .symbol
+                            .symbol_offset
+                            .wrapping_add(skip as isize)
+                            .wrapping_add(self.opcodes.ptr_size as isize);
                         self.current_opcode = Some(BindOpCode::BindAndSkipping { times: times - 1, skip });
                         return Some(sym);
                     }
@@ -414,11 +430,11 @@ impl<'a> Iterator for LazyBind<'a> {
                     self.symbol.symbol_offset = segment_offset as isize;
                 }
                 BindOpCode::AddAddress { offset } => {
-                    self.symbol.symbol_offset += offset;
+                    self.symbol.symbol_offset = self.symbol.symbol_offset.wrapping_add(offset);
                 }
                 BindOpCode::Bind => {
                     let sym = self.symbol.clone();
-                    self.symbol.symbol_offset += self.opcodes.ptr_size as isize;
+                    self.symbol.symbol_offset = self.symbol.symbol_offset.wrapping_add(self.opcodes.ptr_size as isize);
                     return Some(sym);
                 }
                 _ => {
@@ -568,25 +584,34 @@ impl<'a> Iterator for Rebase<'a> {
                     self.symbol.symbol_offset = segment_offset as isize;
                 }
                 RebaseOpCode::AddAddress { offset } => {
-                    self.symbol.symbol_offset += offset;
+                    self.symbol.symbol_offset = self.symbol.symbol_offset.wrapping_add(offset);
                 }
                 RebaseOpCode::Rebase { times } => {
                     if times > 0 {
                         let sym = self.symbol.clone();
-                        self.symbol.symbol_offset += self.opcodes.ptr_size as isize;
+                        self.symbol.symbol_offset =
+                            self.symbol.symbol_offset.wrapping_add(self.opcodes.ptr_size as isize);
                         self.current_opcode = Some(RebaseOpCode::Rebase { times: times - 1 });
                         return Some(sym);
                     }
                 }
                 RebaseOpCode::RebaseAndAddAddress { offset } => {
                     let sym = self.symbol.clone();
-                    self.symbol.symbol_offset += offset + self.opcodes.ptr_size as isize;
+                    self.symbol.symbol_offset = self
+                        .symbol
+                        .symbol_offset
+                        .wrapping_add(offset)
+                        .wrapping_add(self.opcodes.ptr_size as isize);
                     return Some(sym);
                 }
                 RebaseOpCode::RebaseAndSkipping { times, skip } => {
                     if times > 0 {
                         let sym = self.symbol.clone();
-                        self.symbol.symbol_offset += (skip + self.opcodes.ptr_size) as isize;
+                        self.symbol.symbol_offset = self
+                            .symbol
+                            .symbol_offset
+                            .wrapping_add(skip as isize)
+                            .wrapping_add(self.opcodes.ptr_size as isize);
                         self.current_opcode = Some(RebaseOpCode::RebaseAndSkipping { times: times - 1, skip });
                         return Some(sym);
                     }
